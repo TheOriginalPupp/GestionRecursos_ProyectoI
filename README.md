@@ -12,3 +12,13 @@ Requerimientos:
 7) A la hora de compilar el MAKEFILE se generan ejecutables, los cuales se guardan en USR/LOCAL/BIN.
 8) Este MAKEFILE actualiza el PATH para que agregue LOCAL. Es necesario asegurarse de que el proceso padre TENGA EL PATH ACTUALIZADO.
 9) Si se hace una llamada, por ejemplo a la estadistica CPU con el comando ./PADRE CPU 1234, este no debe realizar la llamada al fork() del hijo, sino que el PADRE propiamente es quien las imprime.
+
+Referencias Bibliograficas:
+https://www.site24x7.com/learn/linux/optimize-memory.html
+https://access.redhat.com/documentation/es-es/red_hat_enterprise_linux/4/html/reference_guide/ch-proc
+https://www.kernel.org/doc/html/latest/filesystems/proc.html
+https://tldp.org/LDP/Linux-Filesystem-Hierarchy/html/proc.html
+https://www.geeksforgeeks.org/proc-file-system-linux/
+https://docs.oracle.com/cd/E24842_01/html/E23086/spmonitor-22.html
+https://manpages.ubuntu.com/manpages/trusty/es/man8/vmstat.8.html
+https://www.ibm.com/docs/es/power7?topic=commands-vmstat-command
