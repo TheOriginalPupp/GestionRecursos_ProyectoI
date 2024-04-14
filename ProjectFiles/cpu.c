@@ -13,7 +13,7 @@ typedef struct {
 } ProcessInfo;
 
 int main() {
-    const char* top_command = "top -b -n 1";
+    const char* top_command = "/usr/bin/top -b -n 1";
 
     ProcessInfo process_info[1024];
     int num_processes = 0;
@@ -60,7 +60,7 @@ int main() {
         suma_cpu_total += process_info[i].cpu_usage;
     }
 
-    fclose(top_output);
+    pclose(top_output);
 
     printf("PID\tUso de CPU\tComando\n");
     for (int i = 1; i < num_processes; i++) {
