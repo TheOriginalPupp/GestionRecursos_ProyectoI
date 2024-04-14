@@ -2,13 +2,13 @@ CC=gcc #Compilador
 CFLAGS=-I. -Wall #Opciones de compilacion (directorio actual)
 LDLIBS=
 
-EXECUTABLE=programa_principal #Padre que queremos compilar
-CHILDREN=programa_cpu programa_memoria programa_disco #Hijos 
+EXECUTABLE=programa #Padre que queremos compilar
+CHILDREN=cpu memoria disco #Hijos 
 
 all: $(EXECUTABLE) $(CHILDREN) #Compilar
 
 # Regla para el padre (enlaza para crear el ejecutable)
-$(EXECUTABLE): programa_principal.o
+$(EXECUTABLE): programa.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
 
 # Reglas para los hijos

@@ -7,9 +7,8 @@
 #include <fcntl.h>      // libreria para manipular datos, con read(), open() y write()
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) { // Si solo se llama al programa pero sin argumentos (por ejemplo si no se especifica
-        printf("Uso: %s <tipo_estadistica>\n", argv[0]); // el tipo de estadistica ya sea disco, cpu, etc)
-        printf("Ejemplo: %s disco\n", argv[0]);
+    if (argc < 2) { // Si solo se llama al programa pero sin argumentos (por ejemplo si no se especifica
+        printf("Ingrese: %s <tipo_estadistica>\n", argv[0]); // el tipo de estadistica ya sea disco, cpu, etc)
         exit(EXIT_FAILURE);
     }
     
@@ -33,7 +32,7 @@ int main(int argc, char *argv[]) {
         setenv("PATH", ".", 1); // Setea el PATH actual a donde se deberian encontrar los hijos
         close(pipefd[0]);
         dup2(pipefd[1], STDOUT_FILENO);
-        execlp(argv[1], argv[1], NULL);
+        execvp(argv[1], &argv[1]);  // Aumenta la cantidad de argumentos que puede recibir
         perror("Error en exec");
         exit(EXIT_FAILURE);
     } else {
