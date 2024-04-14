@@ -14,13 +14,13 @@ Requerimientos:
 9) Si se hace una llamada, por ejemplo a la estadistica CPU con el comando ./PADRE CPU 1234, este no debe realizar la llamada al fork() del hijo, sino que el PADRE propiamente es quien las imprime.
 
 Comandos:
-./programa cpu (muestra la informacion de todos los procesos que estan corriendo en el CPU con el comando top, y el porcentaje de utilizacion de CPU total)
-./programa cpu [PID] (muestra la informacion del proceso con ese PID en los ultimos 5 minutos)
-./programa mem (por definir virtual)
-./programa mem (por definir real)
-./programa disco (muestra el porcentaje de espacio utilizado y espacio libre del disco en KB)
-./programa disco -tm (muestra el porcentaje de espacio utilizado y espacio libre del disco en MiB)
-./programa disco -tg (muestra el porcentaje de espacio utilizado y espacio libre del disco en GiB)
+- ./programa cpu (muestra la informacion de todos los procesos que estan corriendo en el CPU con el comando top, y el porcentaje de utilizacion de CPU total)
+- ./programa cpu [PID] (muestra la informacion del proceso con ese PID en los ultimos 5 minutos)
+- ./programa mem (por definir virtual)
+- ./programa mem (por definir real)
+- ./programa disco (muestra el porcentaje de espacio utilizado y espacio libre del disco en KB)
+- ./programa disco -tm (muestra el porcentaje de espacio utilizado y espacio libre del disco en MiB)
+- ./programa disco -tg (muestra el porcentaje de espacio utilizado y espacio libre del disco en GiB)
 
 Referencias Bibliograficas:
 - https://www.site24x7.com/learn/linux/optimize-memory.html
