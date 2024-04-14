@@ -5,7 +5,6 @@
 #include <sys/wait.h>   // para poder utilizar el wait()
 #include <sys/stat.h>   // para obtener info de estadisticas, como el stat que se utiliza en el hijo
 #include <fcntl.h>      // libreria para manipular datos, con read(), open() y write()
-// lo mas probable sea necesario agregar otra libreria para utilizar MAKEFILE, falta revisar
 
 int main(int argc, char *argv[]) {
     if (argc != 2) { // Si solo se llama al programa pero sin argumentos (por ejemplo si no se especifica
