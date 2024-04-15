@@ -16,9 +16,9 @@ Requerimientos:
 Comandos:
 - ./programa cpu (muestra la informacion de todos los procesos que estan corriendo en el CPU con el comando top, y el porcentaje de utilizacion de CPU total)
 - ./programa cpu [PID] (muestra la informacion del proceso con ese PID en los ultimos 5 minutos)
-- ./programa memoria (muestra la memoria total del sistema y la memoria virtual y real total utilizada)
-- ./programa memoria -r (muestra la memoria real total)
-- ./programa memoria -v (muestra la memoria virtual total)
+- ./programa memoria (muestra la memoria total, memoria virtual, y memoria real total utilizada y libre)
+- ./programa memoria -r (muestra todos los procesos junto a su porcentaje de memoria real total)
+- ./programa memoria -v (muestra todos los procesos junto a su porcentaje de memoria virtual total)
 - ./programa disco (muestra el porcentaje de espacio utilizado y espacio libre del disco en KB)
 - ./programa disco -tm (muestra el porcentaje de espacio utilizado y espacio libre del disco en MiB)
 - ./programa disco -tg (muestra el porcentaje de espacio utilizado y espacio libre del disco en GiB)

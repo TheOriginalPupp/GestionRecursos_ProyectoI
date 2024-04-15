@@ -1,106 +1,119 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
-#include <dirent.h> //Para trabajar con directorios
+#include <string.h>
+#include <dirent.h> // Para trabajar con directorios
 #include <sys/types.h> // Para definiciones de tipos
 #include <sys/stat.h>  // Para estadísticas de archivos
-
+#define MAX_PROC_PATH 312
 
 int main(int argc, char *argv[]) {
-    //Variables
-    DIR *dir;
-    int pid;
-    unsigned long vm, rss; // Variables Virtual memory y Resident set size
-    unsigned long vm_total = 0, rss_total = 0;
-    //Variables para seleccionar
-    int use_real = 0;
-    int use_virtual = 0;
-
-    //Guarda el tamanio de pagina del sistema
-    int page_size = getpagesize();
-
-    //Navegar en los directorios de /proc
-    struct dirent *entry;
-    struct stat statbuf;
-    FILE *fp;
-    char path[1024], line[256];
-
-    //Revisa los argumentos pasados al programa (usa real si -r y virtual si -v)
-    for (int i = 1; i < argc; i++) {  
-        if (strcasecmp(argv[i], "-r") == 0) {
-            use_real = 1;  
-        }
-        else if (strcasecmp(argv[i], "-v") == 0) {
-            use_virtual = 1;  
-        }
-    }
-
-    // Abrir directorio /proc 
-    dir = opendir("/proc");
-    if (dir == NULL) {
-        perror("Error al abrir el archivo /proc");
-        exit(EXIT_FAILURE);
-    }
-
-    // Variables para leer la memoria total desde /proc/meminfo 
-    FILE *fp_meminfo = fopen("/proc/meminfo", "r");
+    FILE *fp_meminfo;
     char buffer[256];
-    unsigned long mem_total = 0;
+    unsigned long mem_total = 0, mem_free = 0, mem_available = 0, swap_free = 0, swap_total = 0;
 
-     // Leer la memoria total del sistema 
+    fp_meminfo = fopen("/proc/meminfo", "r");
     if (fp_meminfo == NULL) {
         perror("Error al abrir el archivo /proc/meminfo");
         exit(EXIT_FAILURE);
     }
 
-    //Procesar las entradas en /proc
-    while ((entry = readdir(dir)) != NULL) {
-        sprintf(path, "/proc/%s", entry->d_name);
-        if (stat(path, &statbuf) == 0) {
-            if (S_ISDIR(statbuf.st_mode)) {
-                pid = atoi(entry->d_name);
-                if (pid > 0) {
-                    sprintf(path, "/proc/%d/statm", pid);
-                    fp = fopen(path, "r");
-                    if (fp) {
-                        if (fgets(line, sizeof(line), fp)) {
-                            sscanf(line, "%lu %lu", &vm, &rss);
-                            vm_total += vm * page_size;
-                            rss_total += rss * page_size;
-                        }
-                        fclose(fp);
-                    }
-                }
-            }
-        }
-    }
-    closedir(dir);
-
     while (fgets(buffer, sizeof(buffer), fp_meminfo)) {
         if (strncmp(buffer, "MemTotal:", 9) == 0) {
             sscanf(buffer, "MemTotal: %lu kB", &mem_total);
-            break;
+        } else if (strncmp(buffer, "MemFree:", 8) == 0) {
+            sscanf(buffer, "MemFree: %lu kB", &mem_free);
+        } else if (strncmp(buffer, "MemAvailable:", 13) == 0) {
+            sscanf(buffer, "MemAvailable: %lu kB", &mem_available);
+        } else if (strncmp(buffer, "SwapTotal:", 10) == 0) {
+            sscanf(buffer, "SwapTotal: %lu kB", &swap_total);
+        } else if (strncmp(buffer, "SwapFree:", 9) == 0) {
+            sscanf(buffer, "SwapFree: %lu kB", &swap_free);
         }
     }
     fclose(fp_meminfo);
-    //Convertir de kB a bytes
-    mem_total *= 1024; 
 
-    //Convertir a GB y mostrar segun los argumentos
-    if (use_real) {
-        // Mostrar solo la memoria real
-        printf("Memoria real total utilizada: %.2f GB (%.2f%%)\n", rss_total / (double)(1024 * 1024 * 1024), (rss_total * 100.0) / mem_total);
-    } else if (use_virtual) {
-        // Mostrar solo la memoria virtual
-        printf("Memoria virtual total utilizada: %.2f GB (%.2f%%)\n", vm_total / (double)(1024 * 1024 * 1024), (vm_total * 100.0) / mem_total);
-    } else {
-        // Mostrar ambas memorias
-        printf("Memoria total del sistema: %.2f GB\n", mem_total / (double)(1024 * 1024 * 1024));
-        printf("Memoria virtual total utilizada: %.2f GB (%.2f%%)\n", vm_total / (double)(1024 * 1024 * 1024), (vm_total * 100.0) / mem_total);
-        printf("Memoria real total utilizada: %.2f GB (%.2f%%)\n", rss_total / (double)(1024 * 1024 * 1024), (rss_total * 100.0) / mem_total);
+    double total_gb = mem_total / (1024.0 * 1024.0);
+    double used_gb = (mem_total - mem_free) / (1024.0 * 1024.0);
+    double free_gb = mem_free / (1024.0 * 1024.0);
+    double total_gb_virtual = swap_total / (1024.0 * 1024.0);
+    double used_gb_virtual = (swap_total - swap_free) / (1024.0 * 1024.0);
+    double free_gb_virtual = swap_free / (1024.0 * 1024.0);
+    
+    double used_percentage = (used_gb / total_gb) * 100.0;
+    double free_percentage = (free_gb / total_gb) * 100.0;
+    double used_percentage_virtual = (used_gb_virtual / total_gb_virtual) * 100.0;
+    double free_percentage_virtual = (free_gb_virtual / total_gb_virtual) * 100.0;
+    
+    if (argc <= 1 || (argc > 1 && strcmp(argv[1], "-v") != 0 && strcmp(argv[1], "-r") != 0)) {
+        printf("Memoria total del sistema: %.2fGB\n", total_gb);
+        printf("Memoria total real utilizada: %.2fGB (%.2f%%)\n", used_gb, used_percentage);
+        printf("Memoria total real libre: %.2fGB (%.2f%%)\n", free_gb, free_percentage);
+        printf("Memoria total virtual: %.2fGB\n", total_gb_virtual);
+        printf("Memoria total virtual utilizada: %.6fGB (%.2f%%)\n", used_gb_virtual, used_percentage_virtual);
+        printf("Memoria total virtual libre: %.2fGB (%.2f%%)\n", free_gb_virtual, free_percentage_virtual);
+        printf("Uso con argumentos: %s [-r] [-v]\n", argv[0]);
+        return EXIT_SUCCESS;
     }
+    
+    if (strcmp(argv[1], "-r") == 0) {
+        DIR *proc_dir = opendir("/proc");
+        if (proc_dir == NULL) {
+            perror("Error al abrir el directorio /proc");
+            return EXIT_FAILURE;
+        }
+        
+        printf("\nPID\tNombre\t\t\tTamano(kB)\n");
+        
+        struct dirent *entry;
+        double total = 0.0;
+        while ((entry = readdir(proc_dir)) != NULL) {
+            if (entry->d_type == DT_DIR && atoi(entry->d_name) != 0) {
+                char *proc_path = malloc(MAX_PROC_PATH);
+                FILE *status_file;
+                char bufferProc[1024];
+                char name[256];
+                char *rss = NULL;
+                
+                snprintf(proc_path, MAX_PROC_PATH, "/proc/%s/status", entry->d_name);
 
+                status_file = fopen(proc_path, "r");
+                if (status_file == NULL) {
+                    perror("Error al abrir el archivo de estado del proceso");
+                    continue;
+                }
+
+                while (fgets(bufferProc, sizeof(bufferProc), status_file) != NULL) {
+                    if (strncmp(bufferProc, "Name:", 5) == 0) {
+                        sscanf(bufferProc, "Name: %[^\n]", name);
+                    } 
+                    else if (strncmp(bufferProc, "VmRSS:", 6) == 0) {
+                        char rssBuffer[32];
+                        sscanf(bufferProc, "VmRSS: %s", rssBuffer);
+                        rss = strtok(rssBuffer, " ");
+                    }
+                }
+                if (rss != NULL) {
+                printf("%s\t%-20s\t%s\t", entry->d_name, name, rss);
+                double process_size_kb = atof(rss);
+                double process_percentage = ((process_size_kb / (used_gb * 1024))) / 10;
+                printf("(%.2f%%)\n", process_percentage);
+                total += process_size_kb;
+            }
+                fclose(status_file);
+            }
+        }
+        closedir(proc_dir);
+        printf("Memoria total del sistema: %.2fGB\n", total_gb);
+        printf("Memoria total real utilizada: %.2fGB (%.2f%%)\n", used_gb, used_percentage);
+        printf("Memoria total real libre: %.2fGB (%.2f%%)\n", free_gb, free_percentage);
+    }
+    
+    if (strcmp(argv[1], "-v") == 0) {
+        printf("Memoria total virtual: %.2fGB\n", total_gb_virtual);
+        printf("Memoria total virtual utilizada: %.6fGB (%.2f%%)\n", used_gb_virtual, used_percentage_virtual);
+        printf("Memoria total virtual libre: %.2fGB (%.2f%%)\n", free_gb_virtual, free_percentage_virtual);
+    }
+    
     return 0;
 }
-
