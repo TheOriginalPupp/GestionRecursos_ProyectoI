@@ -1,3 +1,6 @@
+//Ignacio Andre Ledezma Hidalgo / 402520080
+//Wendy Carballo Chavarria / 207270492
+
 #include <stdio.h>      // libreria estandar para funciones de entrada y salida
 #include <stdlib.h>     // para utilizar exit() y mostrar mensajes de SUCCESS o FAILURE
 #include <unistd.h>     // libreria que permite utilizar los fork() y pipes
