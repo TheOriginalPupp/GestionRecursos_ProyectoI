@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
             return EXIT_FAILURE;
         }
         
-        printf("\nPID\tNombre\t\t\tTamano(kB)\n");
+        printf("\nPID\tNombre\t\t\tTamano(kB) y porcentaje de uso de memoria real\n");
         
         struct dirent *entry;
         double total = 0.0;
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
                 double process_percentage = ((process_size_kb / (used_gb * 1024))) / 10;
                 printf("(%.2f%%)\n", process_percentage);
                 total += process_size_kb;
-            }
+                }
                 fclose(status_file);
             }
         }
@@ -110,10 +110,37 @@ int main(int argc, char *argv[]) {
     }
     
     if (strcmp(argv[1], "-v") == 0) {
+        DIR *proc_dir = opendir("/proc");
+        if (proc_dir == NULL) {
+            perror("Error al abrir el directorio /proc");
+            return EXIT_FAILURE;
+        }
+        
+        FILE *ps_output = popen("/usr/bin/ps -aux --sort -vsz", "r");
+        if (ps_output == NULL) {
+            perror("Error al ejecutar el comando ps");
+            return EXIT_FAILURE;
+        }
+        
+        printf("\nPID\tTamano(kB)\tNombre\n");
+
+        char line[1024];
+        fgets(line, sizeof(line), ps_output);
+        while (fgets(line, sizeof(line), ps_output) != NULL) {
+            char pid[32], vsz[32], command[512];
+            sscanf(line, "%*s%s%*s%*s%*s%s%*s%[^\n]", pid, vsz, command);
+            char *command_name = strrchr(command, '/');
+            if (command_name != NULL) {
+                command_name++;
+            } else {
+                command_name = command;
+            }
+            double vsz_kb = atof(vsz);
+            printf("%s\t%s\t%.2f%%\t%s\n", pid, vsz, (vsz_kb / (total_gb_virtual * 1024)) / 10, command_name);
+        }
+        closedir(proc_dir);
+        pclose(ps_output);
         printf("Memoria total virtual: %.2fGB\n", total_gb_virtual);
-        printf("Memoria total virtual utilizada: %.6fGB (%.2f%%)\n", used_gb_virtual, used_percentage_virtual);
-        printf("Memoria total virtual libre: %.2fGB (%.2f%%)\n", free_gb_virtual, free_percentage_virtual);
     }
-    
     return 0;
 }
