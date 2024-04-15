@@ -33,3 +33,5 @@ Referencias Bibliograficas:
 - https://manpages.ubuntu.com/manpages/trusty/es/man8/vmstat.8.html
 - https://www.ibm.com/docs/es/power7?topic=commands-vmstat-command
 - https://www.cyberciti.biz/faq/how-to-check-running-process-in-linux-using-command-line/ (Muestra como usar el ps -aux y el top para la parte del CPU Usage)
+- https://neoserver.site/help/how-check-memory-utilization-process-linux (Para la parte de memoria virtual y memoria real)
+- https://www.sysadmit.com/2022/11/linux-ps-aux-explicado.html
